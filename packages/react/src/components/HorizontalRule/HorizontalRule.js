@@ -21,7 +21,6 @@ const { prefix } = settings;
  * @returns {*} Horizontal Rule component
  */
 function hrMod(mod) {
-  console.log('mod');
   return mod && `${prefix}--hr--${mod}`;
 }
 
