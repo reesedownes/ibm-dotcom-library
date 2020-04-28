@@ -74,6 +74,7 @@ const LocaleModalRegions = ({
          * @param {*} btn btn element
          */
         const localeBackActive = btn => {
+          console.log('running localeBackActive');
           setIsFiltering(false);
           setClearResults(true);
           document.getElementById(`${prefix}--locale-modal__filter`).value = '';
