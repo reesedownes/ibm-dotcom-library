@@ -102,4 +102,16 @@ describe('<LocaleModalCountries />', () => {
       1
     );
   });
+
+  it('click works', () => {
+    const localeModalCountries = shallow(
+      <LocaleModalCountries regionList={sortList(mockLocaleData.regionList)} />
+    );
+
+    console.log('locale countries: ', localeModalCountries.html());
+
+    /*expect(localeModalCountries.find('.bx--locale-modal__filter')).toHaveLength(
+      1
+    );*/
+  });
 });
