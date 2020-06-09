@@ -5,16 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import localeData from '../../../../../services/src/services/Locale/__tests__/data/response.json';
+import { act } from 'react-dom/test-utils';
 import LocaleModalRegions from '../LocaleModalRegions';
+import mockLocaleData from '../__data__/locale-data.json';
+import { mount } from 'enzyme';
 import React from 'react';
-import { shallow } from 'enzyme';
+import ReactDOM from 'react-dom';
 
 // const { prefix } = settings;
 
-const mockLocaleData = Object.assign({}, localeData);
-
 const sortList = list => {
+  console.log(list);
   const pageLangs = {
     'en-us': 'https://www.ibm.com/us-en/',
     'x-default': 'https://www.ibm.com',
@@ -55,23 +56,8 @@ const sortList = list => {
 jest.mock('@carbon/ibmdotcom-services', () => ({
   LocaleAPI: {
     getLocale: jest.fn(() => Promise.resolve({ cc: 'us', lc: 'en' })),
-    getList: jest.fn(() =>
-      Promise.resolve({
-        localeModal: {
-          availabilityText:
-            'This page is available in the following locations and languages',
-          headerTitle: 'Select region',
-          modalClose: 'Close modal',
-          searchClearText: 'Clear search input',
-          searchLabel: 'Search by location or language',
-          searchPlaceholder: 'Search by location or language',
-          unavailabilityText:
-            'This page is unavailable in your preferred location or language',
-        },
-        regionList: mockLocaleData.regionList,
-      })
-    ),
-    getLangDisplay: jest.fn(() => Promise.resolve('United States — English')),
+    getList: jest.fn(() => Promise.resolve(mockLocaleData)),
+    getLangDisplay: jest.fn(() => Promise.resolve('United States - English')),
   },
 }));
 
@@ -90,13 +76,51 @@ jest.mock('@carbon/ibmdotcom-utilities', () => ({
 }));
 
 describe('<LocaleModalRegions />', () => {
+  let container;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+    container = null;
+  });
+
   it('modal renders correctly', () => {
-    const localeModalCountries = shallow(
-      <LocaleModalRegions regionList={sortList(mockLocaleData.regionList)} />
+    const _localeModalRegions = mount(
+      <LocaleModalRegions
+        regionList={sortList(mockLocaleData)}
+        returnButtonLabel={'buttonLabel'}
+      />
     );
 
-    expect(localeModalCountries.find('.bx--locale-modal__filter')).toHaveLength(
+    /*
+    console.log('LocaleModalRegions: ', _localeModalRegions.html());
+    console.log('LocaleModalRegions debug: ', _localeModalRegions.debug());
+    */
+
+    expect(_localeModalRegions.find('.bx--locale-modal__regions')).toHaveLength(
       1
     );
+  });
+
+  it('clicking region does callback', () => {
+    act(() => {
+      ReactDOM.render(
+        <LocaleModalRegions
+          regionList={sortList(mockLocaleData)}
+          returnButtonLabel={'buttonLabel'}
+        />,
+        container
+      );
+    });
+
+    const _link = container.querySelectorAll('.bx--card--link');
+    console.log('_link length:', _link.length);
+    console.log('_link innerHtml:', _link[0]);
+
+    //expect(LocaleModalRegions.setCurrentRegion).toHaveBeenCalled();
   });
 });

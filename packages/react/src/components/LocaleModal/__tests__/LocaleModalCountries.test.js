@@ -5,15 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import localeData from '../../../../../services/src/services/Locale/__tests__/data/response.json';
+import { shallow, mount } from 'enzyme';
+import { ipcinfoCookie } from '@carbon/ibmdotcom-utilities';
 import LocaleModalCountries from '../LocaleModalCountries';
+import mockLocaleData from '../__data__/locale-data.json';
 import React from 'react';
 import root from 'window-or-global';
-import { shallow } from 'enzyme';
 
 // const { prefix } = settings;
-
-const mockLocaleData = Object.assign({}, localeData);
 
 console.log('root', root.document);
 
@@ -58,23 +57,8 @@ const sortList = list => {
 jest.mock('@carbon/ibmdotcom-services', () => ({
   LocaleAPI: {
     getLocale: jest.fn(() => Promise.resolve({ cc: 'us', lc: 'en' })),
-    getList: jest.fn(() =>
-      Promise.resolve({
-        localeModal: {
-          availabilityText:
-            'This page is available in the following locations and languages',
-          headerTitle: 'Select region',
-          modalClose: 'Close modal',
-          searchClearText: 'Clear search input',
-          searchLabel: 'Search by location or language',
-          searchPlaceholder: 'Search by location or language',
-          unavailabilityText:
-            'This page is unavailable in your preferred location or language',
-        },
-        regionList: mockLocaleData.regionList,
-      })
-    ),
-    getLangDisplay: jest.fn(() => Promise.resolve('United States — English')),
+    getList: jest.fn(() => Promise.resolve(mockLocaleData)),
+    getLangDisplay: jest.fn(() => Promise.resolve('United States - English')),
   },
 }));
 
@@ -90,12 +74,17 @@ jest.mock('@carbon/ibmdotcom-utilities', () => ({
       version: 'dds.v1.0.0',
     })
   ),
+  ipcinfoCookie: {
+    get: jest.fn(() => Promise.resolve({ cc: 'us', lc: 'en' })),
+    set: jest.fn(() => Promise.resolve({})),
+  },
+  geolocation: jest.fn(() => Promise.resolve('us')),
 }));
 
 describe('<LocaleModalCountries />', () => {
   it('modal renders correctly', () => {
     const localeModalCountries = shallow(
-      <LocaleModalCountries regionList={sortList(mockLocaleData.regionList)} />
+      <LocaleModalCountries regionList={sortList(mockLocaleData)} />
     );
 
     expect(localeModalCountries.find('.bx--locale-modal__filter')).toHaveLength(
@@ -103,15 +92,12 @@ describe('<LocaleModalCountries />', () => {
     );
   });
 
-  it('click works', () => {
-    const localeModalCountries = shallow(
-      <LocaleModalCountries regionList={sortList(mockLocaleData.regionList)} />
+  it('sets a cookie', () => {
+    const _localeModalCountries = mount(
+      <LocaleModalCountries regionList={sortList(mockLocaleData)} />
     );
+    _localeModalCountries.find('.bx--locale-modal__locales').simulate('click');
 
-    console.log('locale countries: ', localeModalCountries.html());
-
-    /*expect(localeModalCountries.find('.bx--locale-modal__filter')).toHaveLength(
-      1
-    );*/
+    expect(ipcinfoCookie.set).toHaveBeenCalled();
   });
 });

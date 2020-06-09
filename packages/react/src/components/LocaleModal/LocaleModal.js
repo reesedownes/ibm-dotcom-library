@@ -106,7 +106,7 @@ const LocaleModal = ({ isOpen, setIsOpen, localeData, localeDisplay }) => {
    */
   const sortList = list => {
     const pageLangs = altlangs();
-    console.log('altlangs: ', altlangs());
+    //console.log('altlangs: ', altlangs());
     const filterList = [];
 
     list.regionList &&
@@ -136,7 +136,7 @@ const LocaleModal = ({ isOpen, setIsOpen, localeData, localeDisplay }) => {
         filterList[index].countries.sort((a, b) => (a.name > b.name ? 1 : -1));
       });
 
-    console.log('filterList: ', filterList);
+    //console.log('filterList: ', filterList);
     return filterList;
   };
 

@@ -5,35 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { shallow, mount } from 'enzyme';
-import localeData from '../../../../../services/src/services/Locale/__tests__/data/response.json';
+import { act } from 'react-dom/test-utils';
 import LocaleModal from '../LocaleModal';
+import mockLocaleData from '../__data__/locale-data.json';
+import { mount } from 'enzyme';
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 // const { prefix } = settings;
-
-const mockLocaleData = Object.assign({}, localeData);
 
 jest.mock('@carbon/ibmdotcom-services', () => ({
   LocaleAPI: {
     getLocale: jest.fn(() => Promise.resolve({ cc: 'us', lc: 'en' })),
-    getList: jest.fn(() =>
-      Promise.resolve({
-        localeModal: {
-          availabilityText:
-            'This page is available in the following locations and languages',
-          headerTitle: 'Select region',
-          modalClose: 'Close modal',
-          searchClearText: 'Clear search input',
-          searchLabel: 'Search by location or language',
-          searchPlaceholder: 'Search by location or language',
-          unavailabilityText:
-            'This page is unavailable in your preferred location or language',
-        },
-        regionList: mockLocaleData.regionList,
-      })
-    ),
-    getLangDisplay: jest.fn(() => Promise.resolve('United States — English')),
+    getList: jest.fn(() => Promise.resolve(mockLocaleData)),
+    getLangDisplay: jest.fn(() => Promise.resolve('United States - English')),
   },
 }));
 
@@ -50,26 +35,44 @@ jest.mock('@carbon/ibmdotcom-utilities', () => ({
 }));
 
 describe('<LocaleModal />', () => {
-  it('modal renders correctly', () => {
-    const localeModal = shallow(<LocaleModal />);
+  let container;
 
-    expect(localeModal.find('.bx--locale-modal')).toHaveLength(1);
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+    container = null;
   });
 
   it('modal close should set isOpen to close', () => {
-    const localeModal = mount(<LocaleModal isOpen={false} />);
-    /*
-    const closeBtn = localeModal.find(
-      `.bx--modal-close`
-    );
-    */
+    const _localeModal = mount(<LocaleModal isOpen={false} />);
 
-    expect(localeModal.props().isOpen).toBe(false);
+    expect(_localeModal.props().isOpen).toBe(false);
   });
 
   it('open prop should be true if isOpen is set to {true}', () => {
-    const localeModal = mount(<LocaleModal isOpen={true} />);
+    const _localeModal = mount(<LocaleModal isOpen={true} />);
 
-    expect(localeModal.props().isOpen).toBe(true);
+    expect(_localeModal.props().isOpen).toBe(true);
+  });
+
+  it('modal renders correctly', () => {
+    act(() => {
+      ReactDOM.render(
+        <LocaleModal
+          isOpen={true}
+          localeData={mockLocaleData}
+          localeDisplay={'Test - Test'}
+        />,
+        container
+      );
+    });
+
+    const _link = container.querySelectorAll('.bx--card--link');
+
+    //expect(_localeModal.props().isOpen).toBe(true);
   });
 });
